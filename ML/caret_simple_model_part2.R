@@ -62,3 +62,5 @@ cal_rmse(test_data$medv, p)
 ## save model .RDS
 saveRDS(model, "lm_model.RDS")
 
+## read model back into Rstudio
+model <- readRDS("lm_model.RDS")
