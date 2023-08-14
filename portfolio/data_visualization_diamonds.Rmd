@@ -1,0 +1,80 @@
+---
+title: "Data Visualization Bootcamp homework"
+author: "Napon Tah"
+date: "2023-07-09"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+## Introduction
+
+Study the diamonds dataset to explore the interesting insight by 5 charts
+
+## 1. Carat and Price relationship
+
+```{r}
+library(ggplot2)
+library(ggpubr)
+ggplot(diamonds, aes(carat,price, col=cut))+
+  geom_point(size=0.8)+
+  facet_wrap(~cut, ncol=2)+
+  geom_smooth(method = "lm", col="red")+
+  stat_cor(method = "pearson", label.x = 3, label.y = 30)+
+  theme_minimal()
+
+```
+
+
+```{r}
+cor(diamonds$carat, diamonds$price)
+
+```
+The correlation of carat and price group by cut is about 0.86 - 0.93
+
+And overview correlation of carat and price is about 0.92
+
+
+## 2. Carat distribution group by clarity
+
+```{r}
+ggplot(diamonds, aes(clarity, carat))+
+  geom_boxplot()+
+  theme_minimal()
+
+ggplot(diamonds, aes(clarity, carat))+
+  geom_violin()+
+  theme_minimal()
+
+```
+
+
+From the distribution chart, higher diamond clarity is difficult to found in high carat diamonds (can refer from violin chart).
+
+Or can said that "More carat have more possibility to found the flaw"
+
+
+
+### Diamond Color and Clarity chart
+![Reference: https://i.pinimg.com/originals/f5/f9/e3/f5f9e3bf1dfe64054161ede9d7be2242.gif](https://i.pinimg.com/originals/f5/f9/e3/f5f9e3bf1dfe64054161ede9d7be2242.gif)
+
+
+## 3. Diamondd price density and histogram chart
+```{r}
+ggplot(diamonds, aes(price))+
+  geom_histogram(fill = "orange")+
+  theme_minimal()
+
+ggplot(diamonds, aes(price))+
+  geom_density(col = "red")+
+  theme_minimal()
+```
+
+
+The histogram and density chart shown that the less supply diamonds, the price will go higher Meaning "The diamond price is depend on the rarity"
+
+
+
+
+
+
