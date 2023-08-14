@@ -38,7 +38,8 @@ prep_df <- df %>%
 
 # check price distribution
 ggplot(data = prep_df , aes(price))+
-  geom_histogram()
+  geom_histogram()+
+  theme_minimal()
 
 
 # normalize skew distribution by take log
@@ -47,7 +48,8 @@ prep_df_log$price <- prep_df$price %>%
   log() # 
 
 ggplot(data = prep_df_log , aes(price))+
-  geom_histogram()
+  geom_histogram()+
+  theme_minimal()
 
 # 1. train test split
 split_data <- function(df, train_size=0.8) {
