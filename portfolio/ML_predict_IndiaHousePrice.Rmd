@@ -13,10 +13,18 @@ Develop machine learning model predict India house price
 
 
 #### Data source
-https://data.world/dataindianset2000/house-price-india
+file: House Price India.xlsx
+
+sheet: 2017 (sheet 2)
+
+record: 2974 records
+
+url: https://data.world/dataindianset2000/house-price-india
 
 
 #### Implementation detail
+Data split:  train:test = 80:20
+
 Model: Linear Regression 
 
 Resampling method: Bootstrapped (25 reps) 
@@ -67,12 +75,12 @@ prep_df <- df %>%
 ```
 
 #### 2.2 Normalize price distribution
-Due to the price is skew distribution, 
+Due to the price is right skew distribution, 
 
 ```{r}
 # check price distribution
 ggplot(data = prep_df , aes(price))+
-  geom_histogram()+
+  geom_histogram(col = "black", fill = "blue")+
   theme_minimal()
 
 ```
@@ -86,12 +94,12 @@ prep_df_log$price <- prep_df$price %>%
   log() # 
 
 ggplot(data = prep_df_log , aes(price))+
-  geom_histogram()+
+  geom_histogram(col = "black", fill = "blue")+
   theme_minimal()
 ```
 
 ## 3. Model developing
-
+#### 3.1 Train Test split
 ```{r}
 # 1. train test split
 split_data <- function(df, train_size=0.8) {
@@ -117,6 +125,13 @@ test_data_log <- test_data
 test_data_log$price <- test_data$price %>%
   log()
 
+```
+
+
+#### 3.2 Train model
+
+```{r}
+
 # 2. train model
 model <- train(price ~ .,
                data = train_data_log,
@@ -131,12 +146,22 @@ p_train <- p_train_log %>%
   exp()
 
 
+```
+
+
+#### 3.3 Model scoring
+
+```{r}
 # 3. score/ predict new data (test/ unseen data)
 
 p_test_log <- predict(model, newdata=test_data_log) 
 p_test <- p_test_log %>%
   exp()
+```
 
+
+#### 3.4 Model evaluation
+```{r}
 # 4. evaluate model
 
 cal_mae <- function(actual, pred) {
@@ -161,36 +186,102 @@ cal_rmse <- function(actual, pred) {
 act1 <- train_data$price
 pred1 <- p_train
 
-cal_mae(act1, pred1)
-cal_mse(act1, pred1)
-cal_rmse(act1, pred1)
+mae_train <- cal_mae(act1, pred1)
+mse_train <- cal_mse(act1, pred1)
+rmse_train <- cal_rmse(act1, pred1)
 
 ## Evaluate model with test data (normal price)
 act2 <- test_data$price
 pred2 <- p_test
 
-cal_mae(act2, pred2)
-cal_mse(act2, pred2)
-cal_rmse(act2, pred2)
+mae_test <- cal_mae(act2, pred2)
+mse_test <- cal_mse(act2, pred2)
+rmse_test <- cal_rmse(act2, pred2)
 
 ## Evaluate model with train data (log price)
 act3 <- train_data_log$price
 pred3 <- p_train_log
 
-cal_mae(act3, pred3)
-cal_mse(act3, pred3)
-cal_rmse(act3, pred3)
+mae_train_log <- cal_mae(act3, pred3)
+mse_train_log <- cal_mse(act3, pred3)
+rmse_train_log <- cal_rmse(act3, pred3)
 
 ## Evaluate model with test data (log price)
 act4 <- test_data_log$price
 pred4 <- p_test_log
 
-cal_mae(act4, pred4)
-cal_mse(act4, pred4)
-cal_rmse(act4, pred4)
+mae_test_log <- cal_mae(act4, pred4)
+mse_test_log <- cal_mse(act4, pred4)
+rmse_test_log <- cal_rmse(act4, pred4)
 
+## create compare data frame
+measure <- c("mae", "mse", "rmse")
+train_price <- c(mae_train, mse_train, rmse_train)
+test_price <- c(mae_test, mse_test, rmse_test)
+train_price_log <- c(mae_train_log, mse_train_log, rmse_train_log)
+test_price_log <- c(mae_test_log, mse_test_log, rmse_test_log)
+
+sum_result <- data.frame(measure, 
+                         train_price,
+                         test_price,
+                         train_price_log,
+                         test_price_log)
+
+sum_result
+
+```
+
+## 4. Compare model performance between normalize data vs not normalize data
+
+```{r}
+# train model with out price normalization (not take log)
+
+model_nolog <- train(price ~ .,
+               data = train_data,
+               method = "lm")
+
+
+p_train2 <- predict(model_nolog, newdata=train_data) 
+
+p_test2 <- predict(model_nolog, newdata=test_data) 
+
+
+## Evaluate model_nolog with train data (normal price)
+act5 <- train_data$price
+pred5 <- p_train2
+
+mae_train_nolog <- cal_mae(act5, pred5)
+mse_train_nolog <- cal_mse(act5, pred5)
+rmse_train_nolog <- cal_rmse(act5, pred5)
+
+## Evaluate model_nolog with test data (normal price)
+act6 <- test_data$price
+pred6 <- p_test2
+
+mae_test_nolog <- cal_mae(act6, pred6)
+mse_test_nolog <- cal_mse(act6, pred6)
+rmse_test_nolog <- cal_rmse(act6, pred6)
 
 ```
 
 
+
+Model performance with normalized data
+```{r}
+model_norm_price <- c(model$results[2:4])
+model_norm_price
+
+
+```
+
+Model performance without normalized data (not take log)
+```{r}
+
+model_skew_price <- c(model_nolog$results[2:4])
+model_skew_price
+
+```
+
+### Conclusion
+Model performance with normalized price distribution is higher than skew distribution price using (considered in term of Rsquared)
 
