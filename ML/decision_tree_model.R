@@ -9,7 +9,7 @@ data("PimaIndiansDiabetes")
 df <- PimaIndiansDiabetes
 
 
-## decission tree model
+## decision tree model
 
 set.seed(24)
 n <- nrow(df)
