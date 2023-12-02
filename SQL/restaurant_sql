@@ -1,0 +1,163 @@
+-- open our database
+.open restaurant.db
+
+--drop table menu;
+
+-- Create table menu
+Create table if not exists menu
+  (menu_id int unique,
+  menu_name text,
+  menu_price int
+  );
+
+insert into menu values
+  (1, 'frenchfries', 50),
+  (2, 'pizza', 150),
+  (3, 'salad', 25);
+
+-- Create table ingredient
+Create table if not exists ingredient
+  (ingredient_id int unique,
+  ingredient_name text,
+  menu_id int,
+  supplier_id int
+  );
+
+INSERT INTO ingredient VALUES 
+(1, 'potato', 1, 1),
+(2, 'salt', 1, 2),
+(3, 'palm oil', 1, 2),
+(4, 'tomato', 2, 1),
+(5, 'flour', 2, 2),
+(6, 'pepper', 2, 2),
+(7, 'onion', 2, 1),
+(8, 'cheese', 2, 3),
+(9, 'iceberg', 3, 1),
+(10, 'egg', 3, 2),
+(11, 'salad dressing', 3, 2),
+(12, 'green oak', 3, 1);
+
+-- Create table supplier
+Create table if not exists supplier
+  (supplier_id int unique,
+  supplier_name text,
+  supplier_location text
+  );
+
+INSERT INTO supplier VALUES 
+(1, 'veggiestore', 'USA'),
+(2, 'foodland', 'THAILAND'),
+(3, 'dairyfarm', 'SWITZERLAND');
+
+-- show table
+.table
+
+.mode column
+select * from menu ;
+select * from ingredient ;
+select * from supplier ;
+
+
+-- Aggregate function
+select 
+  count(menu_id),
+  min(menu_price),
+  max(menu_price)
+  
+from menu;
+
+-- JOIN function
+-- JOIN menu, ingredient and supplier table
+select "JOIN Multi-table";
+select 
+  a.menu_id,
+  a.menu_name,
+  b.ingredient_name,
+  c.supplier_name,
+  c.supplier_location
+
+  
+from menu as a
+JOIN ingredient as b
+ON a.menu_id = b.menu_id
+
+JOIN supplier as c
+ON c.supplier_id = b.supplier_id
+;
+
+
+-- Create view (Virtual table)
+select "CREATE VIEW (Virtual table)";
+CREATE VIEW IF NOT EXISTS restaurant_material_list AS
+select 
+  a.menu_id,
+  a.menu_name,
+  b.ingredient_name,
+  c.supplier_name,
+  c.supplier_location
+
+  
+from menu as a
+JOIN ingredient as b
+ON a.menu_id = b.menu_id
+
+JOIN supplier as c
+ON c.supplier_id = b.supplier_id
+;
+
+select * from restaurant_material_list;
+
+-- Sub-query
+-- menu price >= 50 THB + THAILAND's supplier
+select "Sub-query";
+select 
+  sub1.menu_id,
+  sub1.menu_name,
+  sub1.menu_price,
+  sub2.ingredient_name,
+  sub3.supplier_name,
+  sub3.supplier_location
+
+  
+from (select * from menu
+      where menu_price >= 50) as sub1
+  
+JOIN (select * from ingredient
+      ) as sub2
+
+ON sub1.menu_id = sub2.menu_id
+
+JOIN (select * from supplier
+      where supplier_location = 'THAILAND') as sub3
+  
+ON sub3.supplier_id = sub2.supplier_id
+;
+
+-- WITH (common table expression)
+select "WITH common table expression";
+WITH 
+  sub1 as (select * from menu
+          where menu_price >= 50),
+
+  sub2 as (select * from ingredient
+          ),
+
+  sub3 as (select * from supplier
+          where supplier_location = 'THAILAND')
+
+select 
+  sub1.menu_id,
+  sub1.menu_name,
+  sub1.menu_price,
+  sub2.ingredient_name,
+  sub3.supplier_name,
+  sub3.supplier_location
+
+  
+from sub1
+JOIN sub2
+ON sub1.menu_id = sub2.menu_id
+
+JOIN sub3
+ON sub3.supplier_id = sub2.supplier_id
+;
